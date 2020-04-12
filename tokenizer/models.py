@@ -5,81 +5,106 @@ separators = [".", ",", ";", ".", "!", "?", ":", "'"]
 
 
 class Token:
-  def __init__(self, **kwargs):
-    self.pos = kwargs["pos"]
-    self.value = kwargs["value"]
-    self.start = kwargs.get("start")
-    self.end = kwargs.get("end")
-    self.isEntity = False
-    self.entityType = None
-    self.components = []
+    def __init__(
+        self,
+        pos,
+        value,
+        start=None,
+        end=None,
+        isEntity=False,
+        entityType=None,
+        components=[],
+    ):
+        self.pos = pos
+        self.value = value
+        self.start = start
+        self.end = end
+        self.isEntity = False
+        self.entityType = None
+        self.components = components
 
-  def to_dict(self):
-    return vars(self)
+    def to_dict(self):
+        return vars(self)
 
-  def __str__(self):
-    return self.value
+    def __str__(self):
+        return self.value
 
-  def __repr__(self):
-    return f"""
-    <Token pos={self.pos} value='{self.value}' start={self.start} end={self.end} >
-    """
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}"
+            f"("
+            f"pos={self.pos!r},"
+            f"value={self.value!r},"
+            f"start={self.start!r},"
+            f"end={self.end!r},"
+            f"isEntity={self.isEntity!r},"
+            f"entityType={self.entityType!r},"
+            f"components={self.components!r},"
+            f")"
+        )
 
-  def __len__(self):
-    return len(self.value)
+    def __len__(self):
+        return len(self.value)
 
-  @classmethod
-  def hasAttr(cls, **kwargs):
-    return cls(**kwargs)
+    @classmethod
+    def hasAttr(cls, **kwargs):
+        return cls(**kwargs)
 
 
 class Text:
-  def __init__(self, text, separators=separators, customTokenizer=None):
-    self.text = text
-    self.length = len(self.text)
-    self.customTokenizer = customTokenizer
-    self.separators = separators
-    self.tokens = self.tokenize(text)
+    def __init__(self, text, separators=separators, customTokenizer=None):
+        self.text = text
+        self.length = len(self.text)
+        self.customTokenizer = customTokenizer
+        self.separators = separators
+        self.tokens = self.tokenize(text)
 
-  def tokenize(self, text):
-    """
+    def tokenize(self, text):
+        """
     Tokenize text
     """
-    if self.customTokenizer:
-      tokenList = self.customTokenizer(text)
-    else:
-      tokenList = self.regexTokenizer(text, self.separators)
+        if self.customTokenizer:
+            tokenList = self.customTokenizer(text)
+        else:
+            tokenList = self.regexTokenizer(text, self.separators)
 
-    tokens = [Token.hasAttr(pos=pos, value=token)for pos, token in enumerate(tokenList)]
-    tokens = self.setTokenPositions(tokens)
+        tokens = [
+            Token.hasAttr(pos=pos, value=token) for pos, token in enumerate(tokenList)
+        ]
+        tokens = self.setTokenPositions(tokens)
 
-    return tokens
+        return tokens
 
-  def regexTokenizer(self, text, separators):
-    """
+    def regexTokenizer(self, text, separators):
+        """
     Regex tokenizer given separators
     Include spaces as tokens
     """
-    sep = "".join(separators)
-    pattern = re.compile(r"[\w]+|[{sep}]|\s+".format(sep=sep))
-    tokenList = pattern.findall(text)
+        sep = "".join(separators)
+        pattern = re.compile(r"[\w]+|[{sep}]|\s+".format(sep=sep))
+        tokenList = pattern.findall(text)
 
-    return tokenList
+        return tokenList
 
-  def setTokenPositions(self, tokenList):
-    """
+    def setTokenPositions(self, tokenList):
+        """
     Set token positions (must include spaces as tokens)
     """
-    count = 0
-    for token in tokenList:
-        token.start = count
-        count += len(token)
-        token.end = count-1
+        count = 0
+        for token in tokenList:
+            token.start = count
+            count += len(token)
+            token.end = count - 1
 
-    return tokenList
+        return tokenList
 
-  def __str__(self):
-    return str(self.text)
+    def __str__(self):
+        return str(self.text)
 
-  def __len__(self):
-    return self.length
+    def __len__(self):
+        return self.length
+
+
+if __name__ == "__main__":
+    token = Token(pos=1, value="Hello", start=0, end=4)
+    print(eval(repr(token)))
