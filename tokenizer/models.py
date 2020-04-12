@@ -5,10 +5,10 @@ separators = [".", ",", ";", ".", "!", "?", ":", "'"]
 
 
 class Token:
-  def __init__(self, **kwargs)
+  def __init__(self, **kwargs):
     self.pos = kwargs["pos"]
     self.value = kwargs["value"]
-    self.start = kwargs.get("starts")
+    self.start = kwargs.get("start")
     self.end = kwargs.get("end")
     self.isEntity = False
     self.entityType = None
@@ -34,10 +34,11 @@ class Token:
 
 
 class Text:
-  def __init__(self, text, customTokenizer=None, seprators=separators):
+  def __init__(self, text, separators=separators, customTokenizer=None):
     self.text = text
     self.length = len(self.text)
     self.customTokenizer = customTokenizer
+    self.separators = separators
     self.tokens = self.tokenize(text)
 
   def tokenize(self, text):
@@ -48,9 +49,8 @@ class Text:
       tokenList = self.customTokenizer(text)
     else:
       tokenList = self.regexTokenizer(text, self.separators)
-    tokenList = self.setTokenPositions(tokenList)
 
-    tokens = [Token.addAttr(pos=pos, value=token)for pos, token in enumerate(tokenList)]
+    tokens = [Token.hasAttr(pos=pos, value=token)for pos, token in enumerate(tokenList)]
     tokens = self.setTokenPositions(tokens)
 
     return tokens
